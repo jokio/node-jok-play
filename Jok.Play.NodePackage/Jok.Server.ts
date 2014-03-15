@@ -79,6 +79,13 @@ class Server {
         var ipaddress = socket.request.headers["x-forwarded-for"];
 
 
+        // channel-ის შემთხვევაში case sensitive არ არის
+        if (!channel)
+            channel = '';
+
+        channel = channel.toLowerCase();
+
+
         // ip მისამართის გაგება, გათვალისწინებულია proxy-დან მოსული შეტყობინებებიც (heroku-ს შემთხვევა)
         if (ipaddress) {
             var list = ipaddress.split(",");
@@ -195,13 +202,25 @@ class Server {
     // find table
     findTable(user, channel: string, mode: number): GameTableBase {
 
+
         // თუ უკვე თამაშობდა რომელიმე მაგიდაზე
-        var table = this.GameTables.filter(t => t.Players.filter(p => p.UserID == user.UserID)[0] != undefined)[0]
+        var table = this.GameTables.filter(t =>
+            (t.Players.filter(p => p.UserID == user.UserID)[0] != undefined) && // მომხმარებელი იყო მაგიდაზე
+            t.isStarted() &&                                                    // დაწყებულია თამაში
+            !t.isFinished()                                                     // ჯერ არ მორჩენილა
+            )[0]
         if (table) return table;
 
 
         // გადმოწოდებული პარამეტრების მიხედვით შასაბამისი მაგიდის მოძებნა
-        table = this.GameTables.filter(t => t.Channel == channel)[0]
+        table = this.GameTables.filter(t =>
+            t.Channel == channel &&                     // გადმოწოდებული კანალით გაფილტვრა
+            t.Mode == mode &&                           // თამაშის mode-თ გაფილტვრა
+            t.Players.length < t.MaxPlayersCount &&     // მოთამაშეების რაოდენობა არ შევსებულა
+            !t.isStarted() &&                           // თამაში არ დაწყებულა
+            !t.isFinished() &&                          // თამაში არ დამთავრებულა
+            this.isTournamentValid(channel, t, user)    // ტურნირების დროს ნავაროჩენი ლოგიკა
+            )[0]
         if (table) return table;
 
 
@@ -215,6 +234,18 @@ class Server {
 
     createTable(user, channel, mode) {
         return new GameTableBase(channel, mode);
+    }
+
+    isTournamentValid(channel: string, table: GameTableBase, user): boolean {
+
+        if (!this.isTournamentChannel(channel))
+            return true;
+
+        return (user.IsVIP == table.IsVIPTable);
+    }
+
+    isTournamentChannel(channel: string) {
+        return (channel == 'tournament');
     }
 
 

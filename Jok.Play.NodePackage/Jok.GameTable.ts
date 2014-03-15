@@ -8,7 +8,7 @@ class GameTableBase {
     public Status: number;
 
 
-    constructor(public Channel = '', public Mode = 0) {
+    constructor(public Channel = '', public Mode = 0, public MaxPlayersCount = 2, public IsVIPTable = false) {
         this.Players = [];
     }
 
@@ -22,6 +22,15 @@ class GameTableBase {
 
     }
 
+
+
+    public isStarted(): boolean {
+        return false;
+    }
+
+    public isFinished(): boolean {
+        return false;
+    }
 
 
     send(command: string, ...params: any[]) {
