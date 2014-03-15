@@ -3,7 +3,7 @@
 /*           by           */
 /*    Jok Entertainers    */
 /*------------------------*/
-class JP {
+class Helper {
 
     public static IO;
 
@@ -14,15 +14,15 @@ class JP {
     public static SendMail(to: string, subject: string, body: string) {
 
         try {
-            if (!JP.pluginSendgrid) {
+            if (!Helper.pluginSendgrid) {
                 var sendgrid = require('sendgrid');
                 if (sendgrid)
-                    JP.pluginSendgrid = sendgrid(process.env.SENDGRID_USERNAME, process.env.SENDGRID_PASSWORD);
+                    Helper.pluginSendgrid = sendgrid(process.env.SENDGRID_USERNAME, process.env.SENDGRID_PASSWORD);
             }
         }
         catch (err) { return; }
 
-        if (!JP.pluginSendgrid) return;
+        if (!Helper.pluginSendgrid) return;
 
 
         var sendObject = {
@@ -36,22 +36,22 @@ class JP {
             if (err) { return console.error('Sendmail failed', err); }
         };
 
-        JP.pluginSendgrid.send(sendObject, errorSending);
+        Helper.pluginSendgrid.send(sendObject, errorSending);
     }
 
     public static HttpGet(url: string, cb, parseJson = false) {
 
         try {
-            if (!JP.pluginHttp) {
-                JP.pluginHttp = require('http');
+            if (!Helper.pluginHttp) {
+                Helper.pluginHttp = require('http');
             }
         }
         catch (err) { return; }
 
-        if (!JP.pluginHttp) return;
+        if (!Helper.pluginHttp) return;
 
 
-        JP.pluginHttp.get(url, function (res) {
+        Helper.pluginHttp.get(url, function (res) {
 
             var data = '';
             res.on('data', function (chunk) {
@@ -84,9 +84,9 @@ class JP {
 
     public static ChannelSockets(channel: string): any[] {
 
-        if (!JP.IO || !JP.IO.adapter) return;
+        if (!Helper.IO || !Helper.IO.adapter) return;
 
-        var channelClients = JP.IO.adapter().clients(channel);
+        var channelClients = Helper.IO.adapter().clients(channel);
         var result = [];
 
         for (var id in channelClients) {
@@ -95,7 +95,7 @@ class JP {
 
             if (!client_sid) continue;
 
-            var socket = JP.IO.clients[client_sid];
+            var socket = Helper.IO.clients[client_sid];
             if (!socket) continue;
 
             result.push(socket);
