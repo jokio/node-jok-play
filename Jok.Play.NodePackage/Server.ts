@@ -1,5 +1,6 @@
-/// <reference path="jok.gametable.ts" />
-/// <reference path="jok.helper.ts" />
+/// <reference path="gameplayerbase.ts" />
+/// <reference path="gametablebase.ts" />
+/// <reference path="helper.ts" />
 
 
 var engine = require('engine.io');

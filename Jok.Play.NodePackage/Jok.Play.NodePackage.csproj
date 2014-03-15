@@ -68,9 +68,10 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <TypeScriptCompile Include="Jok.Server.ts" />
-    <TypeScriptCompile Include="Jok.GameTable.ts" />
-    <TypeScriptCompile Include="Jok.Helper.ts" />
+    <TypeScriptCompile Include="GamePlayerBase.ts" />
+    <TypeScriptCompile Include="Server.ts" />
+    <TypeScriptCompile Include="GameTableBase.ts" />
+    <TypeScriptCompile Include="Helper.ts" />
     <TypeScriptCompile Include="typings\node\node.d.ts" />
   </ItemGroup>
   <ItemGroup />
