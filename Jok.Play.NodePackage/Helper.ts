@@ -103,13 +103,6 @@ class Helper {
 
         return result;
     }
-
-    public static BuildCommand(command: string, ...params: any[]): string {
-        return JSON.stringify({
-            command: command,
-            params: params
-        });
-    }
 }
 
 

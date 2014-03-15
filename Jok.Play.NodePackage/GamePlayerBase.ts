@@ -15,6 +15,10 @@ class GamePlayerBase {
         var sockets = Helper.ChannelSockets('User' + this.UserID);
         if (!sockets) return;
 
-        sockets.forEach(s => s.send(Helper.BuildCommand(command, params)));
+        params.unshift(command);
+
+        var cmd = JSON.stringify(params);
+
+        sockets.forEach(s => s.send(cmd));
     }
 }

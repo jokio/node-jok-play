@@ -138,11 +138,12 @@ class Server<TGamePlayer extends GamePlayerBase, TGameTable extends GameTableBas
                 console.log('GameTable not found, it must not happen. Passed parameters:', channel, gamemode);
                 return;
             }
-            gameTable.join(data, ipaddress, channel, gamemode);
-
 
             // ავტორიზაციის შესახებ ინფორმაციის გაგზავნა კლიენტთან, რათა გააგრძელოს პროცესი
-            socket.send(Helper.BuildCommand('UserAuthenticated', userid));
+            socket.send(JSON.stringify(['UserAuthenticated', userid]));
+
+
+            gameTable.join(data, ipaddress, channel, gamemode);
 
         }, true);
 
@@ -163,8 +164,14 @@ class Server<TGamePlayer extends GamePlayerBase, TGameTable extends GameTableBas
 
 
             // აუცილებელია გადმოწოდებული იყოს კომანდის პარამეტრი, რის მიხედვითაც მეთოდს მოძებნის მაგიდის კლასში
-            var command = msg.command;
-            var params = msg.params;
+            if (Object.prototype.toString.call(msg) !== '[object Array]') {
+                return;
+            }
+
+            if (!msg.length) return;
+
+            var command = msg.shift();
+            var params = msg;
 
             if (!command) {
                 console.log('Every message must have  "command" and optionaly "params" properties');
@@ -185,6 +192,8 @@ class Server<TGamePlayer extends GamePlayerBase, TGameTable extends GameTableBas
                 console.log('GameTable method not found with name:', command);
                 return;
             }
+
+            params.unshift(userid);
 
             gameTable[command].apply(gameTable, params);
         });
@@ -280,3 +289,4 @@ exports.Server = Server;
 exports.Helper = Helper;
 exports.GameTableBase = GameTableBase;
 exports.GamePlayerBase = GamePlayerBase;
+exports.TableStatus = TableStatus;

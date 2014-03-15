@@ -1,13 +1,15 @@
 /// <reference path="gameplayerbase.ts" />
 /// <reference path="helper.ts" />
 
+
+
 class GameTableBase<TGamePlayer extends GamePlayerBase> {
 
     public ActivePlayer: TGamePlayer;
 
     public Players: TGamePlayer[];
 
-    public Status: TableStatus;
+    public Status = TableStatus.New;
 
 
     constructor(private GamePlayerClass, public Channel = '', public Mode = 0, public MaxPlayersCount = 2, public IsVIPTable = false) {
@@ -119,7 +121,10 @@ class GameTableBase<TGamePlayer extends GamePlayerBase> {
 
 
     send(command: string, ...params: any[]) {
-        this.Players.forEach(p => p.send(command, params));
+
+        params.unshift(command);
+
+        this.Players.forEach(p => p.send.apply(p, params));
     }
 
     getNextPlayer(player?: TGamePlayer): TGamePlayer {
@@ -137,10 +142,6 @@ class GameTableBase<TGamePlayer extends GamePlayerBase> {
         return this.Players[index < this.Players.length - 1 ? ++index : 0];
     }
 }
-
-
-
-
 
 enum TableStatus {
     New,

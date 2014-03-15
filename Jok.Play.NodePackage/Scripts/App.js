@@ -89,17 +89,6 @@ var Helper = (function () {
 
         return result;
     };
-
-    Helper.BuildCommand = function (command) {
-        var params = [];
-        for (var _i = 0; _i < (arguments.length - 1); _i++) {
-            params[_i] = arguments[_i + 1];
-        }
-        return JSON.stringify({
-            command: command,
-            params: params
-        });
-    };
     return Helper;
 })();
 
@@ -129,6 +118,33 @@ Array.prototype.remove = function (item) {
     this.splice(index, 1);
     return true;
 };
+var GamePlayerBase = (function () {
+    function GamePlayerBase(UserID, IPAddress, IsVIP, IsOnline) {
+        this.UserID = UserID;
+        this.IPAddress = IPAddress;
+        this.IsVIP = IsVIP;
+        this.IsOnline = IsOnline;
+        this.HasAnyMoveMade = false;
+    }
+    GamePlayerBase.prototype.send = function (command) {
+        var params = [];
+        for (var _i = 0; _i < (arguments.length - 1); _i++) {
+            params[_i] = arguments[_i + 1];
+        }
+        var sockets = Helper.ChannelSockets('User' + this.UserID);
+        if (!sockets)
+            return;
+
+        params.unshift(command);
+
+        var cmd = JSON.stringify(params);
+
+        sockets.forEach(function (s) {
+            return s.send(cmd);
+        });
+    };
+    return GamePlayerBase;
+})();
 var GameTableBase = (function () {
     function GameTableBase(GamePlayerClass, Channel, Mode, MaxPlayersCount, IsVIPTable) {
         if (typeof Channel === "undefined") { Channel = ''; }
@@ -140,6 +156,7 @@ var GameTableBase = (function () {
         this.Mode = Mode;
         this.MaxPlayersCount = MaxPlayersCount;
         this.IsVIPTable = IsVIPTable;
+        this.Status = 0 /* New */;
         this.Players = [];
     }
     GameTableBase.prototype.join = function (user, ipaddress, channel, mode) {
@@ -240,8 +257,10 @@ var GameTableBase = (function () {
         for (var _i = 0; _i < (arguments.length - 1); _i++) {
             params[_i] = arguments[_i + 1];
         }
+        params.unshift(command);
+
         this.Players.forEach(function (p) {
-            return p.send(command, params);
+            return p.send.apply(p, params);
         });
     };
 
@@ -260,30 +279,6 @@ var GameTableBase = (function () {
         return this.Players[index < this.Players.length - 1 ? ++index : 0];
     };
     return GameTableBase;
-})();
-
-var GamePlayerBase = (function () {
-    function GamePlayerBase(UserID, IPAddress, IsVIP, IsOnline) {
-        this.UserID = UserID;
-        this.IPAddress = IPAddress;
-        this.IsVIP = IsVIP;
-        this.IsOnline = IsOnline;
-        this.HasAnyMoveMade = false;
-    }
-    GamePlayerBase.prototype.send = function (command) {
-        var params = [];
-        for (var _i = 0; _i < (arguments.length - 1); _i++) {
-            params[_i] = arguments[_i + 1];
-        }
-        var sockets = Helper.ChannelSockets('User' + this.UserID);
-        if (!sockets)
-            return;
-
-        sockets.forEach(function (s) {
-            return s.send(Helper.BuildCommand(command, params));
-        });
-    };
-    return GamePlayerBase;
 })();
 
 var TableStatus;
@@ -398,9 +393,10 @@ var Server = (function () {
                 console.log('GameTable not found, it must not happen. Passed parameters:', channel, gamemode);
                 return;
             }
-            gameTable.join(data, ipaddress, channel, gamemode);
 
-            socket.send(Helper.BuildCommand('UserAuthenticated', userid));
+            socket.send(JSON.stringify(['UserAuthenticated', userid]));
+
+            gameTable.join(data, ipaddress, channel, gamemode);
         }, true);
 
         socket.on('message', function (msg) {
@@ -413,8 +409,15 @@ var Server = (function () {
             } catch (err) {
             }
 
-            var command = msg.command;
-            var params = msg.params;
+            if (Object.prototype.toString.call(msg) !== '[object Array]') {
+                return;
+            }
+
+            if (!msg.length)
+                return;
+
+            var command = msg.shift();
+            var params = msg;
 
             if (!command) {
                 console.log('Every message must have  "command" and optionaly "params" properties');
@@ -433,6 +436,8 @@ var Server = (function () {
                 console.log('GameTable method not found with name:', command);
                 return;
             }
+
+            params.unshift(userid);
 
             gameTable[command].apply(gameTable, params);
         });
@@ -499,8 +504,8 @@ var Server = (function () {
         return (channel == 'tournament');
     };
 
-    Server.Start = function (port, TGameTable, GamePlayerClass) {
-        return new Server(port, TGameTable, GamePlayerClass);
+    Server.Start = function (port, TGameTable, TGamePlayerClass) {
+        return new Server(port, TGameTable, TGamePlayerClass);
     };
     Server.API_ROOT_URL = 'http://api.jok.io/';
     return Server;
@@ -510,4 +515,5 @@ exports.Server = Server;
 exports.Helper = Helper;
 exports.GameTableBase = GameTableBase;
 exports.GamePlayerBase = GamePlayerBase;
+exports.TableStatus = TableStatus;
 //# sourceMappingURL=App.js.map
