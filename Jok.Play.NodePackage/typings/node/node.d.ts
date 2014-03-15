@@ -231,7 +231,7 @@ declare module "querystring" {
     export function unescape(): any;
 }
 
-declare module "events" {
+declare module 'events' {
     export class EventEmitter implements NodeEventEmitter {
         static listenerCount(emitter: EventEmitter, event: string): number;
 

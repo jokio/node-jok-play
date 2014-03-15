@@ -111,3 +111,37 @@ class Helper {
         });
     }
 }
+
+
+interface Array {
+    unique(): any[];
+    contains(v): boolean;
+    remove(item: any): boolean;
+}
+
+Array.prototype.unique = function () {
+    var arr = [];
+    for (var i = 0; i < this.length; i++) {
+        if (!arr.contains(this[i])) {
+            arr.push(this[i]);
+        }
+    }
+    return arr;
+}
+
+Array.prototype.contains = function (v) {
+    for (var i = 0; i < this.length; i++) {
+        if (this[i] === v) return true;
+    }
+    return false;
+};
+
+Array.prototype.remove = function (item) {
+
+    var index = this.indexOf(item);
+    if (index == -1)
+        return false;
+
+    this.splice(index, 1);
+    return true;
+};

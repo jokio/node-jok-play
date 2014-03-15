@@ -1,23 +1,24 @@
 /// <reference path="jok.gametable.ts" />
 /// <reference path="jok.helper.ts" />
 
+
 var engine = require('engine.io');
 var engineRooms = require('engine.io-rooms');
 var http = require('http');
 var urlParser = require('url');
 
 
-class Server {
+class Server<TGamePlayer extends GamePlayerBase, TGameTable extends GameTableBase<TGamePlayer>> {
 
     public static API_ROOT_URL = 'http://api.jok.io/';
 
     public StartTime;
-    public GameTables: GameTableBase[] = [];
+    public GameTables: TGameTable[] = [];
     public UsersCount = 0;
 
     private io;
 
-    constructor(private port = process.env.PORT || 9003) {
+    constructor(private port = process.env.PORT || 9003, private GameTableClass?, private GamePlayerClass?) {
 
         var server = http.createServer(this.httpHandler.bind(this));
         this.io = engine.attach(server);
@@ -70,8 +71,6 @@ class Server {
     // processing commands
     onConnectionOpen(socket) {
 
-        console.log('shemovida connection');
-
         var sid = socket.request.query.token;
         var gameid = socket.request.query.gameid;
         var gamemode = socket.request.query.gamemode;
@@ -101,7 +100,7 @@ class Server {
 
         var userid;
         var disconnected;
-        var gameTable: GameTableBase;
+        var gameTable: TGameTable;
 
         var url = Server.API_ROOT_URL + 'User/InfoBySID?sid=' + sid + '&ipaddress=' + ipaddress + '&gameid=' + gameid;
 
@@ -171,6 +170,15 @@ class Server {
                 return;
             }
 
+            var reservedWords = ['Join', 'Leave'];
+            if (command in reservedWords) {
+                console.log('Reserved words cant be used as command:', reservedWords);
+                return;
+            }
+
+            command = 'on' + command;
+
+
             // მაგიდას თუ არ გააჩნია კომანდის შესაბამისი მეთოდი, ვიკიდებთ
             if (typeof gameTable[command] != 'function') {
                 console.log('GameTable method not found with name:', command);
@@ -195,19 +203,26 @@ class Server {
 
             // მაგიდიდან გამოსვლა
             gameTable && gameTable.leave(userid);
+
+            if (!gameTable.Players.length) {
+                var index = this.GameTables.indexOf(gameTable);
+
+                if (index > -1)
+                    this.GameTables.splice(index, 1);
+            }
         });
     }
 
 
     // find table
-    findTable(user, channel: string, mode: number): GameTableBase {
+    findTable(user, channel: string, mode: number): TGameTable {
 
 
         // თუ უკვე თამაშობდა რომელიმე მაგიდაზე
         var table = this.GameTables.filter(t =>
             (t.Players.filter(p => p.UserID == user.UserID)[0] != undefined) && // მომხმარებელი იყო მაგიდაზე
-            t.isStarted() &&                                                    // დაწყებულია თამაში
-            !t.isFinished()                                                     // ჯერ არ მორჩენილა
+            (t.Status == TableStatus.Started) &&                                // დაწყებულია თამაში
+            (t.Status != TableStatus.Finished)                                  // ჯერ არ მორჩენილა
             )[0]
         if (table) return table;
 
@@ -217,8 +232,8 @@ class Server {
             t.Channel == channel &&                     // გადმოწოდებული კანალით გაფილტვრა
             t.Mode == mode &&                           // თამაშის mode-თ გაფილტვრა
             t.Players.length < t.MaxPlayersCount &&     // მოთამაშეების რაოდენობა არ შევსებულა
-            !t.isStarted() &&                           // თამაში არ დაწყებულა
-            !t.isFinished() &&                          // თამაში არ დამთავრებულა
+            (t.Status != TableStatus.Started) &&        // თამაში არ დაწყებულა
+            (t.Status != TableStatus.Finished) &&       // თამაში არ დამთავრებულა
             this.isTournamentValid(channel, t, user)    // ტურნირების დროს ნავაროჩენი ლოგიკა
             )[0]
         if (table) return table;
@@ -227,16 +242,20 @@ class Server {
         // თუ არცერთი არ მოიძებნა, მაშინ უკვე ვქმნით ახალ მაგიდას
         if (!this.createTable) return;
 
+        table = this.createTable(user, channel, mode);
+        if (!table) return;
 
-        return this.createTable(user, channel, mode);
+        this.GameTables.push(table);
+
+        return table;
     }
 
 
-    createTable(user, channel, mode) {
-        return new GameTableBase(channel, mode);
+    createTable(user, channel, mode): TGameTable {
+        return new this.GameTableClass(this.GamePlayerClass, channel, mode, 2, this.isTournamentChannel(channel) ? user.IsVIP : false);
     }
 
-    isTournamentValid(channel: string, table: GameTableBase, user): boolean {
+    isTournamentValid(channel: string, table: TGameTable, user): boolean {
 
         if (!this.isTournamentChannel(channel))
             return true;
@@ -250,13 +269,13 @@ class Server {
 
 
     // Static
-    public static Start(port?) {
-        return new Server(port);
+    public static Start<TGamePlayer extends GamePlayerBase, TGameTable extends GameTableBase<TGamePlayer>>(port?, TGameTable?, TGamePlayerClass?) {
+        return new Server<TGamePlayer, TGameTable>(port, TGameTable, TGamePlayerClass);
     }
 }
 
 
-exports.Server = Server.Start;
+exports.Server = Server;
 exports.Helper = Helper;
 exports.GameTableBase = GameTableBase;
 exports.GamePlayerBase = GamePlayerBase;
