@@ -103,17 +103,29 @@ var Helper = (function () {
     return Helper;
 })();
 var GameTableBase = (function () {
-    function GameTableBase(Channel, Mode) {
+    function GameTableBase(Channel, Mode, MaxPlayersCount, IsVIPTable) {
         if (typeof Channel === "undefined") { Channel = ''; }
         if (typeof Mode === "undefined") { Mode = 0; }
+        if (typeof MaxPlayersCount === "undefined") { MaxPlayersCount = 2; }
+        if (typeof IsVIPTable === "undefined") { IsVIPTable = false; }
         this.Channel = Channel;
         this.Mode = Mode;
+        this.MaxPlayersCount = MaxPlayersCount;
+        this.IsVIPTable = IsVIPTable;
         this.Players = [];
     }
     GameTableBase.prototype.join = function (user, ipaddress, channel, mode) {
     };
 
     GameTableBase.prototype.leave = function (userid) {
+    };
+
+    GameTableBase.prototype.isStarted = function () {
+        return false;
+    };
+
+    GameTableBase.prototype.isFinished = function () {
+        return false;
     };
 
     GameTableBase.prototype.send = function (command) {
@@ -208,6 +220,11 @@ var Server = (function () {
         var channel = socket.request.query.channel;
         var ipaddress = socket.request.headers["x-forwarded-for"];
 
+        if (!channel)
+            channel = '';
+
+        channel = channel.toLowerCase();
+
         if (ipaddress) {
             var list = ipaddress.split(",");
             ipaddress = list[list.length - 1];
@@ -290,16 +307,17 @@ var Server = (function () {
     };
 
     Server.prototype.findTable = function (user, channel, mode) {
+        var _this = this;
         var table = this.GameTables.filter(function (t) {
-            return t.Players.filter(function (p) {
+            return (t.Players.filter(function (p) {
                 return p.UserID == user.UserID;
-            })[0] != undefined;
+            })[0] != undefined) && t.isStarted() && !t.isFinished();
         })[0];
         if (table)
             return table;
 
         table = this.GameTables.filter(function (t) {
-            return t.Channel == channel;
+            return t.Channel == channel && t.Mode == mode && t.Players.length < t.MaxPlayersCount && !t.isStarted() && !t.isFinished() && _this.isTournamentValid(channel, t, user);
         })[0];
         if (table)
             return table;
@@ -314,6 +332,17 @@ var Server = (function () {
         return new GameTableBase(channel, mode);
     };
 
+    Server.prototype.isTournamentValid = function (channel, table, user) {
+        if (!this.isTournamentChannel(channel))
+            return true;
+
+        return (user.IsVIP == table.IsVIPTable);
+    };
+
+    Server.prototype.isTournamentChannel = function (channel) {
+        return (channel == 'tournament');
+    };
+
     Server.Start = function (port) {
         return new Server(port);
     };
@@ -324,5 +353,5 @@ var Server = (function () {
 exports.Server = Server.Start;
 exports.Helper = Helper;
 exports.GameTableBase = GameTableBase;
-exports.GameTableBase = GamePlayerBase;
+exports.GamePlayerBase = GamePlayerBase;
 //# sourceMappingURL=App.js.map

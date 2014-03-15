@@ -259,4 +259,4 @@ class Server {
 exports.Server = Server.Start;
 exports.Helper = Helper;
 exports.GameTableBase = GameTableBase;
-exports.GameTableBase = GamePlayerBase;
+exports.GamePlayerBase = GamePlayerBase;
