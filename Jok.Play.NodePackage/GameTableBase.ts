@@ -9,7 +9,7 @@ class GameTableBase<TGamePlayer extends GamePlayerBase> {
 
     public Players: TGamePlayer[];
 
-    public Status = TableStatus.New;
+    public Status: TableStatus = TableStatus.New;
 
 
     constructor(private GamePlayerClass, public Channel = '', public Mode = 0, public MaxPlayersCount = 2, public IsVIPTable = false) {

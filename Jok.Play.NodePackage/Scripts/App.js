@@ -466,7 +466,7 @@ var Server = (function () {
         var table = this.GameTables.filter(function (t) {
             return (t.Players.filter(function (p) {
                 return p.UserID == user.UserID;
-            })[0] != undefined) && (t.Status == 1 /* Started */) && (t.Status != 3 /* Finished */);
+            })[0] != undefined) && (t.Status == 1 /* Started */ || t.Status == 2 /* StartedWaiting */) && (t.Status != 3 /* Finished */);
         })[0];
         if (table)
             return table;

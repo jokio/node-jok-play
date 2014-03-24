@@ -230,9 +230,9 @@ class Server<TGamePlayer extends GamePlayerBase, TGameTable extends GameTableBas
 
         // თუ უკვე თამაშობდა რომელიმე მაგიდაზე
         var table = this.GameTables.filter(t =>
-            (t.Players.filter(p => p.UserID == user.UserID)[0] != undefined) && // მომხმარებელი იყო მაგიდაზე
-            (t.Status == TableStatus.Started) &&                                // დაწყებულია თამაში
-            (t.Status != TableStatus.Finished)                                  // ჯერ არ მორჩენილა
+            (t.Players.filter(p => p.UserID == user.UserID)[0] != undefined) &&             // მომხმარებელი იყო მაგიდაზე
+            (t.Status == TableStatus.Started || t.Status == TableStatus.StartedWaiting) &&  // დაწყებულია თამაში
+            (t.Status != TableStatus.Finished)                                              // ჯერ არ მორჩენილა
             )[0]
         if (table) return table;
 
