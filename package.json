@@ -1,17 +1,18 @@
 {
   "name": "jok-play",
-  "version": "0.0.22",
+  "version": "0.0.23",
   "description": "creating online games never was so easy",
   "main": "Jok.Play.NodePackage/Scripts/App.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"no test specified\" && exit 1"
   },
   "dependencies": {
 	"engine.io" : "1.0.3",
 	"engine.io-client" : "1.0.3",
 	"engine.io-rooms" : "0.1.1",
 	"eio-reconnect" : "0.8.0",
-	"node-uuid" : "*"
+	"node-uuid" : "*",
+	"mongojs": "0.10.1"
   },
   "repository": {
     "type": "git",

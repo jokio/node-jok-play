@@ -9,6 +9,7 @@ class Helper {
 
     static pluginHttp;
     static pluginSendgrid;
+    static pluginMongojs;
 
 
     public static SendMail(to: string, subject: string, body: string) {
@@ -102,6 +103,31 @@ class Helper {
         }
 
         return result;
+    }
+
+    public static SaveErrorLog(err) {
+
+        try {
+            if (!Helper.pluginMongojs) {
+                Helper.pluginMongojs = require('mongojs');
+            }
+        }
+        catch (err) { return; }
+
+
+        if (!process.env.MONGOHQ_URL) return;
+
+        try {
+            var db = Helper.pluginMongojs(process.env.MONGOHQ_URL, ['ErrorLog']);
+
+            db.ErrorLog.save({
+                Error: err,
+                Stack: err.stack,
+                CreateDate: Date.now()
+            }, err => err && console.log(err));
+
+        }
+        catch (err) { console.log(err); }
     }
 }
 

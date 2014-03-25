@@ -89,6 +89,27 @@ var Helper = (function () {
 
         return result;
     };
+
+    Helper.SaveErrorLog = function (err) {
+        try  {
+            if (!Helper.pluginMongojs) {
+                Helper.pluginMongojs = require('mongojs');
+            }
+        } catch (err) {
+            return;
+        }
+
+        if (!process.env.MONGOHQ_URL)
+            return;
+
+        var db = Helper.pluginMongojs(process.env.MONGOHQ_URL, ['ErrorLog']);
+
+        db.ErrorLog.save({
+            Error: err,
+            Stack: err.stack,
+            CreateDate: Date.now()
+        });
+    };
     return Helper;
 })();
 
