@@ -102,13 +102,19 @@ var Helper = (function () {
         if (!process.env.MONGOHQ_URL)
             return;
 
-        var db = Helper.pluginMongojs(process.env.MONGOHQ_URL, ['ErrorLog']);
+        try  {
+            var db = Helper.pluginMongojs(process.env.MONGOHQ_URL, ['ErrorLog']);
 
-        db.ErrorLog.save({
-            Error: err,
-            Stack: err.stack,
-            CreateDate: Date.now()
-        });
+            db.ErrorLog.save({
+                Error: err,
+                Stack: err.stack,
+                CreateDate: Date.now()
+            }, function (err) {
+                return err && console.log(err);
+            });
+        } catch (err) {
+            console.log(err);
+        }
     };
     return Helper;
 })();
@@ -473,7 +479,9 @@ var Server = (function () {
 
             gameTable && gameTable.leave(userid);
 
-            if (!gameTable.Players.length) {
+            if (!gameTable.Players.length || !gameTable.Players.filter(function (p) {
+                return p.IsOnline;
+            }).length) {
                 var index = _this.GameTables.indexOf(gameTable);
 
                 if (index > -1)

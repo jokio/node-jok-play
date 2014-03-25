@@ -214,7 +214,7 @@ class Server<TGamePlayer extends GamePlayerBase, TGameTable extends GameTableBas
             // მაგიდიდან გამოსვლა
             gameTable && gameTable.leave(userid);
 
-            if (!gameTable.Players.length) {
+            if (!gameTable.Players.length || !gameTable.Players.filter(p=>p.IsOnline).length) {
                 var index = this.GameTables.indexOf(gameTable);
 
                 if (index > -1)
