@@ -129,6 +129,53 @@ class Helper {
         }
         catch (err) { console.log(err); }
     }
+
+    public static FinishGame(obj, cb) {
+
+        try {
+            if (!Helper.pluginHttp) {
+                Helper.pluginHttp = require('http');
+            }
+        }
+        catch (err) { return; }
+
+        var userString = JSON.stringify(obj);
+
+        var headers = {
+            'Content-Type': 'application/json',
+            'Content-Length': userString.length
+        };
+
+        var options = {
+            hostname: 'api.jok.io',
+            port: 80,
+            path: '/game/finish',
+            method: 'POST',
+            headers: headers
+        };
+
+        var req = Helper.pluginHttp.request(options, function (res) {
+            var result = '';
+
+            res.setEncoding('utf8');
+            res.on('data', chunk => result += chunk);
+
+            res.on('end', () => {
+                try {
+                    result = JSON.parse(result);
+                }
+                catch (err) {
+                }
+
+                cb && cb(null, result);
+            });
+        });
+
+        req.on('error', err => cb && cb(err));
+
+        req.write(userString);
+        req.end();
+    }
 }
 
 

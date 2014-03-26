@@ -51,11 +51,9 @@ class GameTableBase<TGamePlayer extends GamePlayerBase> {
                     this.playersChanged();
                 }
                 break;
-
-            // სხვა ყველა შემთხვევებში ვუშვებთ უკან, ახალი მოთამაშე ვერ შემოვა
-            default:
-                return;
         }
+
+        return player;
     }
 
     public leave(userid: number) {
@@ -99,11 +97,9 @@ class GameTableBase<TGamePlayer extends GamePlayerBase> {
                     this.playersChanged();
                 }
                 break;
-
-            // სხვა ყველა შემთხვევაში, უბრალოდ გამოვდივართ
-            default:
-                return;
         }
+
+        return player;
     }
 
 

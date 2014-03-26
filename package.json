@@ -1,6 +1,6 @@
 {
   "name": "jok-play",
-  "version": "0.0.26",
+  "version": "0.1.0",
   "description": "creating online games never was so easy",
   "main": "Jok.Play.NodePackage/Scripts/App.js",
   "scripts": {
