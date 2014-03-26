@@ -158,6 +158,9 @@ var GamePlayerBase = (function () {
         for (var _i = 0; _i < (arguments.length - 1); _i++) {
             params[_i] = arguments[_i + 1];
         }
+        if (!this.IsOnline)
+            return;
+
         var sockets = Helper.ChannelSockets('User' + this.UserID);
         if (!sockets)
             return;
