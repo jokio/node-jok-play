@@ -5,6 +5,8 @@
 
 class GameTableBase<TGamePlayer extends GamePlayerBase> {
 
+    public ID: string;
+
     public ActivePlayer: TGamePlayer;
 
     public Players: TGamePlayer[];
@@ -13,6 +15,7 @@ class GameTableBase<TGamePlayer extends GamePlayerBase> {
 
 
     constructor(private GamePlayerClass, public Channel = '', public Mode = 0, public MaxPlayersCount = 2, public IsVIPTable = false) {
+        this.ID = require('node-uuid').v4();
         this.Players = [];
     }
 

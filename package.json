@@ -1,6 +1,6 @@
 {
   "name": "jok-play",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "creating online games never was so easy",
   "main": "Jok.Play.NodePackage/Scripts/App.js",
   "scripts": {
@@ -11,7 +11,7 @@
 	"engine.io-client" : "1.0.3",
 	"engine.io-rooms" : "0.1.1",
 	"eio-reconnect" : "0.8.0",
-	"node-uuid" : "*",
+	"node-uuid" : "1.4.1",
 	"mongojs": "0.10.1"
   },
   "repository": {

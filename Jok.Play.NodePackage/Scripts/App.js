@@ -237,6 +237,7 @@ var GameTableBase = (function () {
         this.MaxPlayersCount = MaxPlayersCount;
         this.IsVIPTable = IsVIPTable;
         this.Status = 0 /* New */;
+        this.ID = require('node-uuid').v4();
         this.Players = [];
     }
     GameTableBase.prototype.join = function (user, ipaddress, channel, mode) {
