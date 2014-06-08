@@ -179,7 +179,7 @@ class Helper {
 }
 
 
-interface Array {
+interface Array<T> {
     unique(): any[];
     contains(v): boolean;
     remove(item: any): boolean;

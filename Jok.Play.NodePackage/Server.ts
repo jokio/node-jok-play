@@ -9,7 +9,7 @@ var http = require('http');
 var urlParser = require('url');
 
 
-class Server<TGamePlayer extends GamePlayerBase, TGameTable extends GameTableBase<TGamePlayer>> {
+class Server<TGamePlayer extends GamePlayerBase, TGameTable extends GameTableBase<GamePlayerBase>> {
 
     public static API_ROOT_URL = 'http://api.jok.io/';
 
@@ -279,7 +279,7 @@ class Server<TGamePlayer extends GamePlayerBase, TGameTable extends GameTableBas
 
 
     // Static
-    public static Start<TGamePlayer extends GamePlayerBase, TGameTable extends GameTableBase<TGamePlayer>>(port?, TGameTable?, TGamePlayerClass?) {
+    public static Start<TGamePlayer extends GamePlayerBase, TGameTable extends GameTableBase<GamePlayerBase>>(port?, TGameTable?, TGamePlayerClass?) {
         return new Server<TGamePlayer, TGameTable>(port, TGameTable, TGamePlayerClass);
     }
 }

@@ -69,12 +69,15 @@
   </ItemGroup>
   <ItemGroup>
     <TypeScriptCompile Include="GamePlayerBase.ts" />
+    <TypeScriptCompile Include="Scripts\typings\node\node.d.ts" />
+    <TypeScriptCompile Include="Scripts\typings\socket.io\socket.io.d.ts" />
     <TypeScriptCompile Include="Server.ts" />
     <TypeScriptCompile Include="GameTableBase.ts" />
     <TypeScriptCompile Include="Helper.ts" />
-    <TypeScriptCompile Include="typings\node\node.d.ts" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Content Include="packages.config" />
+  </ItemGroup>
   <ItemGroup>
     <Content Include="Scripts\App.js.map" />
   </ItemGroup>
