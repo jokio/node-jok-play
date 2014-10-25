@@ -13,7 +13,7 @@ class GameTableBase<TGamePlayer extends GamePlayerBase> {
 
     public Status: TableStatus = TableStatus.New;
 
-
+    
     constructor(private GamePlayerClass, public Channel = '', public Mode = 0, public MaxPlayersCount = 2, public IsVIPTable = false) {
         this.ID = require('node-uuid').v4();
         this.Players = [];

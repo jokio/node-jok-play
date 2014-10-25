@@ -236,7 +236,7 @@ var GameTableBase = (function () {
         this.Mode = Mode;
         this.MaxPlayersCount = MaxPlayersCount;
         this.IsVIPTable = IsVIPTable;
-        this.Status = 0 /* New */;
+        this.Status = TableStatus.New;
         this.ID = require('node-uuid').v4();
         this.Players = [];
     }
@@ -250,7 +250,7 @@ var GameTableBase = (function () {
         player.IsOnline = true;
 
         switch (this.Status) {
-            case 0 /* New */:
+            case TableStatus.New:
                  {
                     if (!this.Players.contains(player)) {
                         this.Players.push(player);
@@ -263,13 +263,13 @@ var GameTableBase = (function () {
                 }
                 break;
 
-            case 1 /* Started */:
-            case 2 /* StartedWaiting */:
+            case TableStatus.Started:
+            case TableStatus.StartedWaiting:
                  {
                     if (!this.Players.contains(player))
                         return;
 
-                    this.Status = 1 /* Started */;
+                    this.Status = TableStatus.Started;
                     this.playersChanged();
                 }
                 break;
@@ -288,30 +288,30 @@ var GameTableBase = (function () {
         player.IsOnline = false;
 
         switch (this.Status) {
-            case 0 /* New */:
+            case TableStatus.New:
                  {
                     this.Players.remove(player);
                     this.playersChanged();
                 }
                 break;
 
-            case 1 /* Started */:
+            case TableStatus.Started:
                  {
                     if (this.Players.filter(function (p) {
                         return p.HasAnyMoveMade;
                     }).length != 2) {
-                        this.Status = 0 /* New */;
+                        this.Status = TableStatus.New;
                         this.Players.remove(player);
                         this.playersChanged();
                         break;
                     }
 
-                    this.Status = 2 /* StartedWaiting */;
+                    this.Status = TableStatus.StartedWaiting;
                     this.playersChanged();
                 }
                 break;
 
-            case 3 /* Finished */:
+            case TableStatus.Finished:
                  {
                     this.Players.remove(player);
                     this.playersChanged();
@@ -547,13 +547,13 @@ var Server = (function () {
         var table = this.GameTables.filter(function (t) {
             return (t.Players.filter(function (p) {
                 return p.UserID == user.UserID;
-            })[0] != undefined) && (t.Status == 1 /* Started */ || t.Status == 2 /* StartedWaiting */) && (t.Status != 3 /* Finished */);
+            })[0] != undefined) && (t.Status == TableStatus.Started || t.Status == TableStatus.StartedWaiting) && (t.Status != TableStatus.Finished);
         })[0];
         if (table)
             return table;
 
         table = this.GameTables.filter(function (t) {
-            return t.Channel == channel && t.Mode == mode && t.Players.length < t.MaxPlayersCount && (t.Status != 1 /* Started */) && (t.Status != 3 /* Finished */) && _this.isTournamentValid(channel, t, user);
+            return t.Channel == channel && t.Mode == mode && t.Players.length < t.MaxPlayersCount && (t.Status != TableStatus.Started) && (t.Status != TableStatus.Finished) && _this.isTournamentValid(channel, t, user);
         })[0];
         if (table)
             return table;
